@@ -5,7 +5,7 @@ iOS Version is based on https://github.com/picciano/iOS-Tone-Generator
 
 # Installation
 
-    cordova plugin add https://github.com/an-rahulpandey/cordova-plugin-playfrequency.git
+    cordova plugin add https://github.com/scuthbert/cordova-plugin-playfrequency.git
 
 
 # Plugin Usage
