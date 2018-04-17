@@ -23,8 +23,8 @@ public class CDVPlayFrequency extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("playfrequency")) {
 
-            freq = Integer(args.getString(0));
-            sampleRate = Integer(args.getString(1));
+            freq = Integer.parseInt(args.getString(0));
+            sampleRate = Integer.parseInt(args.getString(1));
             Log.d("CordovaLog","Frequency = "+freq);
             Log.d("CordovaLog","Sample Rate = "+sampleRate);
             this.playTone();
