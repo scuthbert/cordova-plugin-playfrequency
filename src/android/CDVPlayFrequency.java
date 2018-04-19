@@ -16,42 +16,59 @@ import org.json.JSONException;
  */
 public class CDVPlayFrequency extends CordovaPlugin {
 
-    private int freq;
-    private int sampleRate;
-    private  AudioTrack track;
+    private final int duration = 10; // seconds
+    private final int sampleRate = 8000;
+    private final int numSamples = duration * sampleRate;
+    private final double sample[] = new double[numSamples];
+    private final double freqOfTone = 440; // hz
+
+    private final byte generatedSnd[] = new byte[2 * numSamples];
+
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("playfrequency")) {
 
-            freq = Integer.parseInt(args.getString(0));
+            freqOfTone = Integer.parseInt(args.getString(0));
             sampleRate = Integer.parseInt(args.getString(1));
             Log.d("CordovaLog","Frequency = "+freq);
             Log.d("CordovaLog","Sample Rate = "+sampleRate);
-            this.playTone();
+            this.playSound();
             return true;
         }
         else if(action.equals("stopfrequency")){
             Log.d("CordovaLog","Stoping Tone");
-            track.stop();
             return true;
         } else {
             return false;
         }
     }
 
-    private void playTone() {
-        Log.d("CordovaLog","Playing Tone");
-        int count = (int)(sampleRate * 2.0 * (5000 / 1000.0)) & ~1;
-        short[] samples = new short[count];
-        for(int i = 0; i < count; i += 2){
-            short sample = (short)(Math.sin(2 * Math.PI * i / (44100.0 / freq)) * 0x7FFF);
-            samples[i + 0] = sample;
-            samples[i + 1] = sample;
+    void genTone(){
+        // fill out the array
+        for (int i = 0; i < numSamples; ++i) {
+            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));
         }
-        track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
-                AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
-                count * (Short.SIZE / 8), AudioTrack.MODE_STATIC);
-        track.write(samples, 0, count);
-        track.play();
+
+        // convert to 16 bit pcm sound array
+        // assumes the sample buffer is normalised.
+        int idx = 0;
+        for (final double dVal : sample) {
+            // scale to maximum amplitude
+            final short val = (short) ((dVal * 32767));
+            // in 16 bit wav PCM, first byte is the low order byte
+            generatedSnd[idx++] = (byte) (val & 0x00ff);
+            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+
+        }
+    }
+
+    void playSound(){
+        this.genTone();
+        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                sampleRate, AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
+                AudioTrack.MODE_STATIC);
+        audioTrack.write(generatedSnd, 0, generatedSnd.length);
+        audioTrack.play();
     }
 }
