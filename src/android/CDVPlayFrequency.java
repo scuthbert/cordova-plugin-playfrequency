@@ -17,12 +17,12 @@ import org.json.JSONException;
 public class CDVPlayFrequency extends CordovaPlugin {
 
     private final int duration = 10; // seconds
-    private final int sampleRate = 8000;
+    private int sampleRate = 8000;
     private final int numSamples = duration * sampleRate;
-    private final double sample[] = new double[numSamples];
-    private final double freqOfTone = 440; // hz
+    private double sample[] = new double[numSamples];
+    private double freqOfTone = 440; // hz
 
-    private final byte generatedSnd[] = new byte[2 * numSamples];
+    private byte generatedSnd[] = new byte[2 * numSamples];
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -30,7 +30,7 @@ public class CDVPlayFrequency extends CordovaPlugin {
 
             freqOfTone = Integer.parseInt(args.getString(0));
             sampleRate = Integer.parseInt(args.getString(1));
-            Log.d("CordovaLog","Frequency = "+freq);
+            Log.d("CordovaLog","Frequency = "+freqOfTone);
             Log.d("CordovaLog","Sample Rate = "+sampleRate);
             this.playSound();
             return true;
